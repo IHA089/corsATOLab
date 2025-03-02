@@ -9,8 +9,8 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 
-lab_type = ""#AccountTakeover"
-lab_name = ""#corsATOLab"
+lab_type = "AccountTakeover"
+lab_name = "corsATOLab"
 
 user_data = {}
 
@@ -19,10 +19,6 @@ corsATO.secret_key = "vulnerable_lab_by_IHA089"
 CORS(corsATO, resources={r"/*": {"origins": "*"}})
 
 JWT_SECRET = "MoneyIsPower"
-
-#def check_libs():
-
-
 
 def create_database():
     db_path = os.path.join(os.getcwd(), lab_type, lab_name, 'users.db')
@@ -198,6 +194,9 @@ def join():
     email = request.form.get('email')
     username = request.form.get('username')
     password = request.form.get('password')
+    if not email.endswith('@iha089.org'):
+        error_message = "Only email with @iha089.org domain is allowed."
+        return render_template('join.html', error=error_message)
     conn = get_db_connection()
     cursor = conn.cursor()
     hash_password = hashlib.md5(password.encode()).hexdigest()
