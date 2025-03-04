@@ -64,40 +64,50 @@ def check_cookies():
     if user_uuid in user_data and jwt_token == user_data[user_uuid]:
         decoded = pyjwt.decode(jwt_token, JWT_SECRET, algorithms="HS256")
         session['user'] = decoded['username']
+        return True
+    else:
+        return False
 
 @corsATO.route('/')
 def home():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('index.html', user=session.get('user'))
 
 @corsATO.route('/index.html')
 def index_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('index.html', user=session.get('user'))
 
 @corsATO.route('/login.html')
 def login_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('login.html')
 
 @corsATO.route('/join.html')
 def join_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('join.html')
 
 @corsATO.route('/acceptable.html')
 def acceptable_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('acceptable.html', user=session.get('user'))
 
 @corsATO.route('/term.html')
 def term_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('term.html', user=session.get('user'))
 
 @corsATO.route('/privacy.html')
 def privacy_html():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     return render_template('privacy.html', user=session.get('user'))
 
 def login_required(f):
@@ -187,7 +197,8 @@ def protected():
 
 @corsATO.route('/join', methods=['GET', 'POST'])
 def join():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     if 'user' in session:
         return render_template('dashboard.html', user=session.get('user'))
 
@@ -228,7 +239,8 @@ def join():
 @corsATO.route("/dashboard.html")
 @login_required
 def dashboard():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     if 'user' not in session:
         return redirect(url_for('login_html'))
     admin_list=['admin', 'administrator']
@@ -249,7 +261,8 @@ def logout():
 @corsATO.route('/profile.html')
 @login_required
 def profile():
-    check_cookies()
+    if not check_cookies():
+        session.clear()
     if 'user' not in session:
         return redirect(url_for('login_html'))
     return render_template('profile.html', user=session.get('user'))
