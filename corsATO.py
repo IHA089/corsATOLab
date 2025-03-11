@@ -222,7 +222,7 @@ def login():
     conn.close()
 
     if user:
-        if not user[4] == 1:
+        if not user[5] == 1:
             return render_template('confirm.html', username=username, password=password)
         session['user'] = username
         user_uuid = user['uuid'] if 'uuid' in user else str(uuid.uuid4())
