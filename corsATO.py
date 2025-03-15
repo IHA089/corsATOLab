@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request, make_response, render_template, session, jsonify, redirect, url_for
 from functools import wraps
 import jwt as pyjwt
-import uuid, datetime, sqlite3, hashlib, random, os, string, request
+import uuid, datetime, sqlite3, hashlib, random, os, string, requests
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
