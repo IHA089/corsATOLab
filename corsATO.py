@@ -2,6 +2,7 @@ import logging
 from flask import Flask, request, make_response, render_template, session, jsonify, redirect, url_for
 from functools import wraps
 import jwt as pyjwt
+from flask_cors import CORS
 import uuid, datetime, sqlite3, hashlib, random, os, string, requests
 
 log = logging.getLogger('werkzeug')
@@ -15,7 +16,7 @@ user_data = {}
 
 corsATO = Flask(__name__)
 corsATO.secret_key = "vulnerable_lab_by_IHA089"
-
+CORS(corsATO, supports_credentials=True)
 JWT_SECRET = "MoneyIsPower"
 
 def create_database():
@@ -160,7 +161,7 @@ def confirm():
             conn.close()
 
         response = make_response(redirect(url_for('dashboard')))
-        response.set_cookie("uuid", user_uuid, httponly=False)
+        response.set_cookie("uuid", user_uuid, httponly=False, samesite="None", secure=True)
         response.set_cookie("jwt_token", jwt_token, httponly=True, samesite="Strict")
         return response
     
@@ -242,7 +243,7 @@ def login():
             conn.close()
 
         response = make_response(redirect(url_for('dashboard')))
-        response.set_cookie("uuid", user_uuid, httponly=False)  
+        response.set_cookie("uuid", user_uuid, httponly=False, samesite="None", secure=True)  
         response.set_cookie("jwt_token", jwt_token, httponly=True, samesite="Strict")
         return response
 
@@ -360,8 +361,4 @@ def add_cache_control_headers(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
-    response.headers["Access-Control-Allow-Origin"] = "*" 
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST" 
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization" 
-    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
