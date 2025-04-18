@@ -3,16 +3,18 @@ from flask import Flask, request, make_response, render_template, session, jsoni
 from functools import wraps
 import jwt as pyjwt
 from flask_cors import CORS
-import uuid, datetime, sqlite3, hashlib, random, os, string, requests
+import uuid, datetime, sqlite3, hashlib, random, os, string, requests, urllib3
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 lab_type = "AccountTakeover"
 lab_name = "corsATOLab"
 
 user_data = {}
+flag_data = {}
 
 corsATO = Flask(__name__)
 corsATO.secret_key = "vulnerable_lab_by_IHA089"
@@ -45,6 +47,11 @@ def create_database():
     conn.commit()
     conn.close()
 
+def generate_flag(length=10):
+    charset = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(charset, k=length))
+    return random_string
+    
 def generate_code():
     first_two = ''.join(random.choices(string.digits, k=2))
     next_four = ''.join(random.choices(string.ascii_uppercase, k=4))
@@ -112,6 +119,10 @@ def term_html():
         session.clear()
     return render_template('term.html', user=session.get('user'))
 
+@corsATO.route('/check.html')
+def check_html():
+    return render_template('check.html', user=session.get('user'))
+    
 @corsATO.route('/privacy.html')
 def privacy_html():
     if not check_cookies():
@@ -189,7 +200,7 @@ def resend():
                     "bodycontent":bdcontent
                 }
         try:
-            k = requests.post(mail_server, json = payload)
+            k = requests.post(mail_server, json = payload, verify=False)
         except:
             return jsonify({"error": "Mail server is not responding"}), 500
         error_message="code sent"
@@ -277,6 +288,10 @@ def protected():
     except pyjwt.InvalidTokenError:
         return jsonify({"message": "Invalid token"}), 401
 
+@corsATO.route('/check', methods=['POST'])
+def check():
+    session_code = request.form.get('sessioncode')
+    
 @corsATO.route('/join', methods=['POST'])
 def join():
     if not check_cookies():
@@ -315,7 +330,7 @@ def join():
                     "bodycontent":bdcontent
                 }
         try:
-            k = requests.post(mail_server, json = payload)
+            k = requests.post(mail_server, json = payload, verify=False)
         except:
             return jsonify({"error": "Mail server is not responding"}), 500
 
@@ -336,8 +351,14 @@ def dashboard():
     if 'user' not in session:
         return redirect(url_for('login_html'))
 
-    return render_template('dashboard.html', user=session.get('user'))
+    username = session.get('user')
+    if username not in flag_data:
+        flag_data[username] = generate_flag()
 
+    flag_code = flag_data[username]
+
+    return render_template('dashboard.html', user=session.get('user'), flag=flag_code)
+    
 @corsATO.route('/logout.html')
 def logout():
     session.clear() 
