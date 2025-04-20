@@ -299,7 +299,23 @@ def protected():
 
 @corsATO.route('/check', methods=['POST'])
 def check():
+    uuid = request.form.get('uuid')
+    jwt_token = request.form.get('jwt_token')
     session_code = request.form.get('sessioncode')
+
+    if uuid in user_data:
+        if user_data[uuid] == jwt_token:
+            if uuid in flag_data:
+                if flag_data[uuid] == session_code:
+                    return render_template('success.html', user=session.get('user'))
+                else:
+                    return render_template('check.html', error="wrong session code")
+            else:
+                return render_template('check.html', error="uuid not match")
+        else:
+            return render_template('check.html', error="JWT Token mismatch")
+    else:
+        return render_template('check.html', error="uuid not found")
     
 @corsATO.route('/join', methods=['POST'])
 def join():
