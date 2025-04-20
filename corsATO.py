@@ -264,7 +264,16 @@ def login():
 @corsATO.route('/get-token', methods=['GET', 'POST'])
 def get_token():
     user_uuid = request.cookies.get("uuid")
+    jwt_token = request.cookies.get("jwt_token")
+    origin = request.headers.get("Origin","")
+    host = request.headers.get("Host", "")
+    referer = request.headers.get("Referer", "")
 
+    if user_uuid in user_data and jwt_token is None:
+        if host not in [origin, referer] and origin in referer:
+            if user_uuid not in flag_data:
+                flag_data[user_uuid] = generate_flag()
+                
     if not user_uuid:
         return jsonify({"message": "UUID not found in cookies."}), 400
 
@@ -348,14 +357,17 @@ def join():
 def dashboard():
     if not check_cookies():
         session.clear()
+        flag_code = ""
+    else:
+        uuid = request.cookies.get('uuid')
+        jwt = request.cookies.get('jwt_token')
+        if uuid in flag_data:
+            flag_code = flag_data[uuid]
+        else:
+            flag_code = ""
+            
     if 'user' not in session:
         return redirect(url_for('login_html'))
-
-    username = session.get('user')
-    if username not in flag_data:
-        flag_data[username] = generate_flag()
-
-    flag_code = flag_data[username]
 
     return render_template('dashboard.html', user=session.get('user'), flag=flag_code)
     
