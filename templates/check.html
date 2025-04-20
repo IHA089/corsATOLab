@@ -72,6 +72,12 @@
 			<div class="form-container">
 				<form action="/check" method="POST" id="loginForm">
 					<p id="error-message" style="color: red;">{% if error %}{{ error }}{% endif %}</p>
+					<label><b>Enter UUID</b></label>
+					<input type="text" name="uuid" id="uuid" required>
+					<br>
+					<label><b>Enter JWT Token</b></label>
+					<input type="text" name="jwt_token" id="jwt_token" required>
+					<br>
 					<label><b>Enter session code</b></label>
 					<input type="text" name="sessioncode" id="sessioncode" required>
 					<br>
