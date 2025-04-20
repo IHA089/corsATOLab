@@ -316,6 +316,8 @@ def check():
             return render_template('check.html', error="JWT Token mismatch")
     else:
         return render_template('check.html', error="uuid not found")
+
+
     
 @corsATO.route('/join', methods=['POST'])
 def join():
